@@ -1,12 +1,18 @@
 package router
 
 import (
-	handler "quizy-be/internal/handlers"
+	"quizy-be/internal/db"
+	"quizy-be/internal/handlers"
 
 	"github.com/go-chi/chi/v5"
 )
 
 func setupAuthRoutes(r *chi.Mux) {
-	r.Post("/auth/login", handler.Login)
-	r.Post("/auth/signup", handler.Signup)
+	client := db.Client
+	if client == nil {
+		panic("MongoDB client not initialized")
+	}
+	handlers.InitAuthHandlers(client.Database("quizy"))
+
+	r.Post("/auth/signup", handlers.Signup)
 }
