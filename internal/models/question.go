@@ -1,11 +1,16 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 type Question struct {
-	QuizID    string    `json:"quizId"`
-	Number    int       `json:"number"`
-	ImageURL  *string   `json:"imageUrl,omitempty"`
-	Body      string    `json:"body"`
-	CreatedAt time.Time `json:"createdAt"`
+	ID        primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	QuizID    primitive.ObjectID `json:"quizId" bson:"quizId"`
+	Number    int                `json:"number" bson:"number"`
+	ImageURL  *string            `json:"imageUrl,omitempty"`
+	Body      string             `json:"body"`
+	CreatedAt time.Time          `json:"createdAt" bson:"createdAt"`
 }

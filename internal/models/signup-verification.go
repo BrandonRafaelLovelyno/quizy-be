@@ -2,13 +2,16 @@ package models
 
 import (
 	"time"
+
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type SignupVerification struct {
-	ID        uint      `json:"id" gorm:"primaryKey"`
-	UserID    uint      `json:"user_id" gorm:"not null"`
-	Token     string    `json:"token" gorm:"not null;size:255"`
-	ExpiresAt time.Time `json:"expires_at" gorm:"not null"`
-	CreatedAt time.Time `json:"created_at" gorm:"autoCreateTime"`
-	UpdatedAt time.Time `json:"updated_at" gorm:"autoUpdateTime"`
+type SignupRequest struct {
+	ID           primitive.ObjectID `json:"id" bson:"_id,omitempty"`
+	Username     string             `json:"username" bson:"username"`
+	Email        string             `json:"email" bson:"email"`
+	PasswordHash string             `json:"-" bson:"passwordHash"`
+	Token        string             `json:"-" bson:"token"`
+	ExpiresAt    time.Time          `json:"-" bson:"expiresAt"`
+	CreatedAt    time.Time          `json:"createdAt" bson:"createdAt"`
 }
