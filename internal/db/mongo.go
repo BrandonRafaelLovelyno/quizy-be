@@ -2,6 +2,8 @@ package db
 
 import (
 	"context"
+	"fmt"
+	"quizy-be/internal/config"
 	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
@@ -10,7 +12,20 @@ import (
 
 var Client *mongo.Client
 
-func InitMongo(uri string) error {
+func InitializeMongoDB() (func(), error) {
+	cfg, err := config.NewMongoDBConfig()
+	if err != nil {
+		return nil, fmt.Errorf("database config error: %w", err)
+	}
+
+	if err := connectMongo(cfg.URI); err != nil {
+		return nil, fmt.Errorf("failed to connect to MongoDB: %w", err)
+	}
+
+	return disconnectMongo, nil
+}
+
+func connectMongo(uri string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
@@ -23,7 +38,7 @@ func InitMongo(uri string) error {
 	return Client.Ping(ctx, nil)
 }
 
-func DisconnectMongo() {
+func disconnectMongo() {
 	if Client != nil {
 		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 		defer cancel()

@@ -12,6 +12,7 @@ func setupAuthRoutes(r *chi.Mux) {
 	if client == nil {
 		panic("MongoDB client not initialized")
 	}
+
 	handlers.InitAuthHandlers(client.Database("quizy"))
 
 	r.Post("/auth/signup", handlers.Signup)

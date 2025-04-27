@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"net/http"
+	"quizy-be/internal/config"
 	"quizy-be/internal/models"
 	"quizy-be/internal/repository"
 	"quizy-be/internal/service"
@@ -13,8 +14,17 @@ import (
 var authService *service.AuthService
 
 func InitAuthHandlers(db *mongo.Database) {
+	emailCfg, err := config.NewEmailConfig()
+	if err != nil {
+		panic("Email config error: " + err.Error())
+	}
+
+	emailSender := func(to []string, subject, htmlBody string) error {
+		return utils.SendHTMLEmail(*emailCfg, to, subject, htmlBody)
+	}
+
 	signupRepo := repository.NewSignupRequestRepository(db)
-	authService = service.NewAuthService(signupRepo)
+	authService = service.NewAuthService(signupRepo, emailSender)
 }
 
 func Signup(w http.ResponseWriter, r *http.Request) {

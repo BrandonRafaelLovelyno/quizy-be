@@ -2,36 +2,37 @@ package service
 
 import (
 	"context"
+	"quizy-be/internal/helper"
 	"quizy-be/internal/models"
 	"quizy-be/internal/repository"
 	"quizy-be/pkg/utils"
-	"time"
-
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type AuthService struct {
-	signupRepo *repository.SignupRequestRepository
+	signupRepo  *repository.SignupRequestRepository
+	emailSender func(to []string, subject, htmlBody string) error
 }
 
-func NewAuthService(signupRepo *repository.SignupRequestRepository) *AuthService {
-	return &AuthService{signupRepo: signupRepo}
+func NewAuthService(
+	signupRepo *repository.SignupRequestRepository,
+	emailSender func(to []string, subject, htmlBody string) error,
+) *AuthService {
+	return &AuthService{
+		signupRepo:  signupRepo,
+		emailSender: emailSender,
+	}
 }
 
 func (s *AuthService) CreateSignupRequest(ctx context.Context, req *models.SignupRequest) error {
-	existing, err := s.signupRepo.FindByEmail(ctx, req.Email)
-	if err != nil {
+	if err := helper.EnsureNoDuplicateEmail(ctx, s.signupRepo, req.Email); err != nil {
 		return err
 	}
 
-	if existing != nil {
-		return ErrEmailExists
-	}
+	helper.InitSignupRequest(req)
 
-	req.ID = primitive.NewObjectID()
-	req.Token = utils.GenerateRandomString(32)
-	req.ExpiresAt = time.Now().Add(24 * time.Hour)
-	req.CreatedAt = time.Now()
+	if err := helper.SendVerificationEmail(s.emailSender, req.Email, req.Token); err != nil {
+		return err
+	}
 
 	return s.signupRepo.Create(ctx, req)
 }

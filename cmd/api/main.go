@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"os"
 
 	"quizy-be/internal/db"
 	"quizy-be/internal/middleware"
@@ -15,18 +14,14 @@ import (
 
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found - using system environment variables")
+		log.Println("No .env file found")
 	}
 
-	mongoURI := os.Getenv("MONGO_URI")
-	if mongoURI == "" {
-		log.Fatal("MONGO_URI environment variable not set")
+	cleanup, err := db.InitializeMongoDB()
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	if err := db.InitMongo(mongoURI); err != nil {
-		log.Fatalf("Failed to connect to MongoDB: %v", err)
-	}
-	defer db.DisconnectMongo()
+	defer cleanup()
 
 	r := chi.NewRouter()
 	middleware.SetupMiddleware(r)
