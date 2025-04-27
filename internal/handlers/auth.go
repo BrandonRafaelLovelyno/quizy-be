@@ -27,25 +27,19 @@ func InitAuthHandlers(db *mongo.Database) {
 	authService = service.NewAuthService(signupRepo, emailSender)
 }
 
-func Signup(w http.ResponseWriter, r *http.Request) {
+func Signup(w http.ResponseWriter, r *http.Request) error {
 	var req models.SignupRequest
 
 	if err := utils.ParseJSONBody(r, &req); err != nil {
-		utils.WriteErrorResponse(w, http.StatusBadRequest, "Invalid request body")
-		return
+		return utils.ErrInvalidInput("Invalid request body")
 	}
 
 	if err := authService.CreateSignupRequest(r.Context(), &req); err != nil {
-		switch err {
-		case service.ErrEmailExists:
-			utils.WriteErrorResponse(w, http.StatusConflict, err.Error())
-		default:
-			utils.WriteErrorResponse(w, http.StatusInternalServerError, "Failed to process signup request")
-		}
-		return
+		return err
 	}
 
 	utils.WriteJSONResponse(w, http.StatusCreated, map[string]string{
 		"message": "Verification email sent",
 	})
+	return nil
 }

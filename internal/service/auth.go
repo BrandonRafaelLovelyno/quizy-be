@@ -5,7 +5,6 @@ import (
 	"quizy-be/internal/helper"
 	"quizy-be/internal/models"
 	"quizy-be/internal/repository"
-	"quizy-be/pkg/utils"
 )
 
 type AuthService struct {
@@ -36,5 +35,3 @@ func (s *AuthService) CreateSignupRequest(ctx context.Context, req *models.Signu
 
 	return s.signupRepo.Create(ctx, req)
 }
-
-var ErrEmailExists = utils.NewError("verification already sent to this email")

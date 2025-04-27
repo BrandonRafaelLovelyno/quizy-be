@@ -1,21 +1,26 @@
 package utils
 
-type Error struct {
-	message string
-}
+import "fmt"
 
-func NewError(message string) error {
-	return &Error{message: message}
+type Error struct {
+	Code    string
+	Message string
 }
 
 func (e *Error) Error() string {
-	return e.message
+	return fmt.Sprintf("%s: %s", e.Code, e.Message)
 }
 
-func (e *Error) Is(target error) bool {
-	t, ok := target.(*Error)
-	if !ok {
-		return false
+func ErrInvalidInput(msg string) *Error {
+	return &Error{
+		Code:    "INVALID_INPUT",
+		Message: msg,
 	}
-	return e.message == t.message
+}
+
+func ErrInternal(msg string) *Error {
+	return &Error{
+		Code:    "INTERNAL_ERROR",
+		Message: msg,
+	}
 }

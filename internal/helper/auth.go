@@ -26,7 +26,7 @@ func EnsureNoDuplicateEmail(ctx context.Context, repo SignupRepository, email st
 	}
 
 	if existing != nil {
-		return ErrEmailExists
+		return utils.ErrInvalidInput("email already exists")
 	}
 
 	return nil
@@ -49,5 +49,3 @@ func SendVerificationEmail(emailSender EmailSender, email, token string) error {
 	}
 	return nil
 }
-
-var ErrEmailExists = utils.NewError("verification already sent to this email")
